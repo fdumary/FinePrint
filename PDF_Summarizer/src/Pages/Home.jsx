@@ -1,13 +1,40 @@
 import { useState } from "react";
 import "../App.css";
-import { useNavigate } from "react-router-dom";
+import { SimplifyDocument } from "../../../Summarizer";
+
+
 
 function Home() {
-  const Navigate = useNavigate();
-  const submission = async (event) => {
-    event.preventDefault();
-    Navigate("/gen");
+
+  const [extractedText, setExtractedText] = useState([]);
+  const [simplifiedText, setSimplifiedText] = useState("");
+
+  const handleOnChange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    
+        // Save file locally or get its path (Node.js backend required)
+    const localPath = file.path || URL.createObjectURL(file);
+    setFilePath(localPath);
+    };
+  const handleSimplify = async (e) => {
+    e.preventDefault();
+    if (!filePath) return;
+    const simplified = await SimplifyDocument(filePath);
+    setSimplifiedText(simplified);
   };
+    
+
+  
+
+  const submission = async (e) => {
+    e.preventDefault();
+    const formdata = new FormData(e.currentTarget)
+  const texts = formdata.get("textsub")
+  console.log(texts)
+    //Navigate("/gen");
+  };
+  
 
   return (
     <>
@@ -16,13 +43,17 @@ function Home() {
       </header>
       <div className="Frontpginsert">
         <div>
-          <form onSubmit={submission}>
-            <input name="Paste text here" />
+          <form onSubmit={handleSimplify}>
+            <input name="textsub" />
             <div></div>
-            <input type="file"></input>
+            <input onChange= {handleOnChange}name="filesub" type="file"></input>
+            
             <div></div>
+            
             <input type="submit" />
           </form>
+        </div>
+         <div>
         </div>
       </div>
     </>
