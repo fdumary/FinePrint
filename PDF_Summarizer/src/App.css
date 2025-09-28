@@ -42,7 +42,10 @@
 }
 
 .Frontpginsert{
- display: table-cell;
-    vertical-align: middle;
+    
+    vertical-align: center;
     height: 50px;
+}
+input{
+margin: 10px;
 }
