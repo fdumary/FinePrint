@@ -1,10 +1,19 @@
 
 import './App.css'
-import { HashRouter } from 'react-router-dom'
+import { HashRouter as Router,Routes, Route } from 'react-router-dom'
+import Home from './Pages/Home'
+import Genpage from './Pages/Genpage'
+
+
 
 function App() {
 return(
-  <h1>Hi</h1>
+<Router>
+  <Routes>
+    <Route path="/"element={<Home/>}/>
+    <Route path="/gen"element={<Genpage/>}/>
+  </Routes>
+</Router>
 )
 }
 
