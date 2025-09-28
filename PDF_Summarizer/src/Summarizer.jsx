@@ -1,5 +1,7 @@
 import ollama from 'ollama'
-import { PdfReader } from 'pdfreader';
+import * as pdfjsLib from 'pdfjs-dist';
+import 'pdfjs-dist/webpack';
+
 
 
 async function UseOllama(prompt) {
@@ -23,47 +25,79 @@ async function UseOllama(prompt) {
     return fullResponse
 }
 
-async function extractTextFromPDF(pdfPath) {
-    return new Promise((resolve, reject) => {
-        let pdfText = "";
-        let lastY = null;
-        let lastX = null;
 
-        new PdfReader().parseFileItems(pdfPath, (err, item) => {
-            if (err) {
-                console.error("error:", err);
-                reject(err);
-            } else if (!item) {
-                console.warn("end of file");
-                // Clean up the extracted text
-                const cleanedText = pdfText
-                    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-                    .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters if missing
-                    .replace(/(\w)(\w)/g, '$1$2') // Keep words together
-                    .trim(); // Remove leading/trailing whitespace
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/build/pdf.worker.min.mjs';
 
-                resolve(cleanedText);
-            } else if (item.text) {
-                // Check if we need to add spacing based on position
-                if (lastY !== null && lastX !== null) {
-                    // If we're on a new line (different Y position)
-                    if (Math.abs(item.y - lastY) > 1) {
-                        pdfText += " ";
-                    }
-                    // If there's a significant horizontal gap
-                    else if (item.x - lastX > 10) {
-                        pdfText += " ";
-                    }
-                }
+export async function extractTextFromPDF(file) {
+  const fileReader = new FileReader();
 
-                pdfText += item.text;
-                lastY = item.y;
-                lastX = item.x + (item.width || 0);
-                // console.log(item.text);
-            }
-        });
-    });
+  return new Promise((resolve, reject) => {
+    fileReader.onload = async function () {
+      const typedArray = new Uint8Array(this.result);
+      const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+
+      const maxPages = pdf.numPages;
+      const pageTextPromises = [];
+
+      for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+        const pagePromise = pdf.getPage(pageNum).then(page =>
+          page.getTextContent().then(textContent =>
+            textContent.items.map(item => item.str).join(' ')
+          )
+        );
+        pageTextPromises.push(pagePromise);
+      }
+
+      try {
+        const allText = await Promise.all(pageTextPromises);
+        resolve(allText.join(' '));
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    fileReader.onerror = reject;
+    fileReader.readAsArrayBuffer(file);
+  });
 }
+
+        
+
+    //     new PdfReader().parseFileItems(pdfPath, (err, item) => {
+    //         if (err) {
+    //             console.error("error:", err);
+    //             reject(err);
+    //         } else if (!item) {
+    //             console.warn("end of file");
+    //             // Clean up the extracted text
+    //             const cleanedText = pdfText
+    //                 .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    //                 .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters if missing
+    //                 .replace(/(\w)(\w)/g, '$1$2') // Keep words together
+    //                 .trim(); // Remove leading/trailing whitespace
+
+    //             resolve(cleanedText);
+    //         } else if (item.text) {
+    //             // Check if we need to add spacing based on position
+    //             if (lastY !== null && lastX !== null) {
+    //                 // If we're on a new line (different Y position)
+    //                 if (Math.abs(item.y - lastY) > 1) {
+    //                     pdfText += " ";
+    //                 }
+    //                 // If there's a significant horizontal gap
+    //                 else if (item.x - lastX > 10) {
+    //                     pdfText += " ";
+    //                 }
+    //             }
+
+    //             pdfText += item.text;
+    //             lastY = item.y;
+    //             lastX = item.x + (item.width || 0);
+    //             // console.log(item.text);
+    //         }
+    //     });
+    // });
+//}
 
 
 
@@ -75,8 +109,8 @@ async function extractTextFromPDF(pdfPath) {
 // console.log(extractedText);
 // UseOllama(extractedText).then(console.log);
 
-export async function SimplifyDocument(pdfPath) {
-  const extractedText = await extractTextFromPDF(pdfPath);
+export async function SimplifyDocument(file) {
+  const extractedText = await extractTextFromPDF(file);
   const simplifiedText = await UseOllama(extractedText);
   return simplifiedText;
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../App.css";
+import { extractTextFromPDF } from "../Summarizer";
 import { SimplifyDocument } from "../Summarizer";
 
 
@@ -8,10 +9,17 @@ function Home() {
 
   const [extractedText, setExtractedText] = useState([]);
   const [simplifiedText, setSimplifiedText] = useState("");
+  const [filePath, setFilePath] = useState("");
+  
+
 
   const handleOnChange = async (e) => {
     const file = e.target.files[0];
+    await SimplifyDocument(file);
     if(!file) return;
+
+    const extracted =await extractTextFromPDF(file);
+    setExtractedText(extracted);
     
         // Save file locally or get its path (Node.js backend required)
     const localPath = file.path || URL.createObjectURL(file);
