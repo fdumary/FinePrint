@@ -1,5 +1,5 @@
 import ollama from 'ollama'
-import { PdfReader } from "pdfreader";
+import { PdfReader } from 'pdfreader';
 
 
 async function UseOllama(prompt) {
@@ -65,12 +65,7 @@ async function extractTextFromPDF(pdfPath) {
     });
 }
 
-async function SimplifyDocument(pdfPath) {
-    let extractedText = await extractTextFromPDF(pdfPath);
-    // console.log(extractedText);
-    let simplifiedText = await UseOllama(extractedText);
-    return simplifiedText;
-}
+
 
 // var givePrompt = " This document constitutes a legally binding agreement (\"Agreement\") between the User (\"You\") and the Service Provider (\"Company\") governing Your access to and use of the services, website, and all associated content (collectively, the \"Service\"). By accessing or using the Service, You acknowledge that You have read, understood, and agree to be bound by these Terms and Conditions. The Company reserves the right, at its sole discretion, to modify or replace these terms at any time without prior notice. Continued use of the Service following any such changes shall constitute Your acceptance of the revised Terms."
 // givePrompt += " You agree to use the Service only for lawful purposes and in a way that does not infringe the rights of, restrict, or inhibit anyone else's use and enjoyment of the Service. You shall not upload or transmit any material that is libelous, defamatory, obscene, or harmful to minors. All intellectual property rights, including but not limited to copyrights, patents, and trademarks in the Service and its contents, are owned by or licensed to the Company. Unauthorized use, reproduction, or distribution of this content is strictly prohibited and may result in civil and criminal penalties, including statutory damages."
@@ -80,7 +75,6 @@ async function SimplifyDocument(pdfPath) {
 // console.log(extractedText);
 // UseOllama(extractedText).then(console.log);
 
-let simplifiedText = await SimplifyDocument("sample.pdf");
 export async function SimplifyDocument(pdfPath) {
   const extractedText = await extractTextFromPDF(pdfPath);
   const simplifiedText = await UseOllama(extractedText);

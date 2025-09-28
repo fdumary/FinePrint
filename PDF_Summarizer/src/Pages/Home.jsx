@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../App.css";
-import { SimplifyDocument } from "../../../Summarizer";
+import { SimplifyDocument } from "../Summarizer";
 
 
 
