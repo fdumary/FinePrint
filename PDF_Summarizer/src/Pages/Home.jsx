@@ -10,14 +10,15 @@ function Home() {
   const [extractedText, setExtractedText] = useState([]);
   const [simplifiedText, setSimplifiedText] = useState("");
   const [filePath, setFilePath] = useState("");
-  
+  const [selectedFile, setSelectedFile] = useState(null);
+
 
 
   const handleOnChange = async (e) => {
     const file = e.target.files[0];
-    await SimplifyDocument(file);
     if(!file) return;
 
+    setSelectedFile(file);
     const extracted =await extractTextFromPDF(file);
     setExtractedText(extracted);
     
@@ -27,8 +28,8 @@ function Home() {
     };
   const handleSimplify = async (e) => {
     e.preventDefault();
-    if (!filePath) return;
-    const simplified = await SimplifyDocument(filePath);
+    if (!selectedFile) return;
+    const simplified = await SimplifyDocument(selectedFile);
     setSimplifiedText(simplified);
   };
     
@@ -64,7 +65,14 @@ function Home() {
          <div>
         </div>
       </div>
+      <div className="ai-response">
+  <h2>Simplified Terms</h2>
+  <p>{simplifiedText}</p>
+</div>
+
     </>
+
+    
   );
 }
 

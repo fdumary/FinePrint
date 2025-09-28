@@ -9,7 +9,7 @@ async function UseOllama(prompt) {
     fullPrompt += prompt
 
     const response = await ollama.chat({
-        model: 'llama3',
+        model: 'gemma3:1b',
         messages: [{ role: 'user', content: prompt }],
         stream: true,
     })
@@ -17,7 +17,8 @@ async function UseOllama(prompt) {
     let fullResponse = ''
     for await (const part of response) {
         if (part.message?.content) {
-            process.stdout.write(part.message.content)
+            console.log(part.message.content);
+
             fullResponse += part.message.content
         }
     }
